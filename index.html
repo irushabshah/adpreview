@@ -1,0 +1,12 @@
+<!DOCTYPE html><html><head><title>Ad Previews</title>
+<style>
+    body { font-family: sans-serif; background: #f0f2f5; padding: 40px; text-align: center; }
+    .controls { margin-bottom: 30px; position: sticky; top: 20px; z-index: 100; }
+    button { padding: 12px 24px; font-weight: bold; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; }
+    .ad-box { background: #fff; margin: 20px; padding: 20px; display: inline-block; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); vertical-align: top; }
+    iframe { border: 1px solid #eee; background: #fff; display: block; margin: 0 auto; }
+</style></head><body>
+    <div class="controls"><button onclick="reloadAds()">🔄 Reload All Ads</button></div>
+    <div id="container"><div class="ad-box"><b>./All Branded</b><br><iframe src="./All Branded/index.html" width="728" height="90"></iframe></div><div class="ad-box"><b>./All Branded/1781481Set_4Video - Ad Set 4 - 728x90</b><br><iframe src="./All Branded/1781481Set_4Video - Ad Set 4 - 728x90/index.html" width="728" height="90"></iframe></div><div class="ad-box"><b>./All Branded/1781481Set_4Video - Ad Set 4 - 300x600</b><br><iframe src="./All Branded/1781481Set_4Video - Ad Set 4 - 300x600/index.html" width="300" height="600"></iframe></div><div class="ad-box"><b>./All Branded/1781481Set_4Video - Ad Set 4 - 970x250</b><br><iframe src="./All Branded/1781481Set_4Video - Ad Set 4 - 970x250/index.html" width="970" height="250"></iframe></div></div><script>
+    function reloadAds() { document.querySelectorAll('iframe').forEach(f => f.src = f.src); }
+</script></body></html>
