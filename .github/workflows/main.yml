@@ -1,14 +1,22 @@
 name: Generate Preview Page
-on: [push] # Runs every time you upload a folder
+on: [push]
+permissions:
+  contents: write # This gives the script permission to save the index.html
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
       - name: Run Indexer
         run: python generate_index.py
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .
+      - name: Commit and Push index.html
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add index.html
+          git commit -m "Auto-update index.html" || exit 0
+          git push
