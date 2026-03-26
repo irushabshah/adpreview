@@ -1,6 +1,6 @@
 # AdPreview: Automated Ad Ops Workflow
 
-This repository provides a high-speed, zero-cost solution for hosting and previewing static and HTML5 display banners (Adobe Animate) at scale. It eliminates manual coding by using a custom Python indexer and GitHub Actions to build live client preview links in seconds.
+This repository provides a high-speed, zero-cost solution for hosting and previewing static and HTML5 display banners (Adobe Animate) at scale. It eliminates manual coding by using a custom Python indexer and GitHub Actions to build live client preview links in a few seconds.
 
 🚀 **How to Use**
 
