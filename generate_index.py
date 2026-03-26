@@ -1,7 +1,6 @@
 import os
 import re
 
-# Template for the Master Preview page
 def get_html_template(title, content):
     return f"""<!DOCTYPE html><html><head><title>{title}</title>
 <style>
@@ -18,34 +17,36 @@ def get_html_template(title, content):
         function reloadAds() {{ document.querySelectorAll('iframe').forEach(f => f.src = f.src); }}
     </script></body></html>"""
 
-# 1. Iterate through every top-level folder (The Advertisers)
+# Process every folder in the root
 for advertiser in os.listdir('.'):
+    # Ignore hidden folders like .github or .git
     if os.path.isdir(advertiser) and not advertiser.startswith('.'):
-        print(f"Processing Advertiser: {advertiser}")
+        print(f"Checking Advertiser: {advertiser}")
         client_content = ""
         
-        # 2. Look for ad subfolders inside the Advertiser folder
-        # (e.g., Tallgrass/300x250)
+        # Look one level deeper for ad sizes (e.g., VishayRecruitment/300x250)
         for subfolder in sorted(os.listdir(advertiser)):
             subpath = os.path.join(advertiser, subfolder)
             index_file = os.path.join(subpath, 'index.html')
             
             if os.path.isdir(subpath) and os.path.exists(index_file):
-                # 3. Extract dimensions from Adobe Animate meta tags
+                # Extract dimensions
                 with open(index_file, 'r', encoding='utf-8', errors='ignore') as f:
                     html_body = f.read()
                     size_match = re.search(r'width=(\d+),height=(\d+)', html_body)
                     w, h = (size_match.group(1), size_match.group(2)) if size_match else ("728", "90")
                 
-                # Add this ad to the Advertiser's master page
+                # Use relative pathing for the iframe
                 client_content += f'''
                 <div class="ad-box">
                     <b>{subfolder}</b><br>
                     <iframe src="{subfolder}/index.html" width="{w}" height="{h}" scrolling="no"></iframe>
                 </div>'''
         
-        # 4. Save the Master HTML file inside the Advertiser folder
+        # Only create the master file if ads were actually found
         if client_content:
             master_html = get_html_template(f"Campaign: {advertiser}", client_content)
-            with open(os.path.join(advertiser, "index.html"), "w", encoding='utf-8') as f:
+            master_path = os.path.join(advertiser, "index.html")
+            with open(master_path, "w", encoding='utf-8') as f:
                 f.write(master_html)
+            print(f"✅ Created: {master_path}")
