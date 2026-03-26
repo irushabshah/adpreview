@@ -13,10 +13,10 @@ jobs:
           python-version: '3.9'
       - name: Run Indexer
         run: python generate_index.py
-      - name: Commit and Push index.html
+      - name: Commit and Push all index files
         run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
-          git add index.html
-          git commit -m "Auto-update index.html" || exit 0
+          git add . # This captures index.html inside all folders
+          git commit -m "Auto-update all master preview files" || exit 0
           git push
