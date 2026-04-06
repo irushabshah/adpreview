@@ -547,7 +547,7 @@ lib.properties = {
 	width: 1024,
 	height: 90,
 	fps: 24,
-	color: "#FFFFFF",
+	color: "#F4F4F4",
 	opacity: 1.00,
 	manifest: [
 		{src:"Image_01.jpg", id:"Image_01"},
