@@ -21,7 +21,6 @@ def get_html_template(title, content):
     </script></body></html>"""
 
 def detect_dimensions(path, name):
-    """Detects dimensions from HTML, filename, or parent folder."""
     if path.endswith('.html'):
         try:
             with open(path, 'r', encoding='utf-8', errors='ignore') as f:
@@ -31,49 +30,41 @@ def detect_dimensions(path, name):
                 cs = re.search(r'width\s*:\s*(\d+)px\s*;\s*height\s*:\s*(\d+)px', c)
                 if cs: return cs.group(1), cs.group(2)
         except: pass
-
-    # Check filename/foldername for "300x600"
+    # Improved regex to handle underscores like _300x600
     match = re.search(r'(\d+)[xX_-](\d+)', name)
     if match: return match.group(1), match.group(2)
-    
-    # Fallback: check the parent folder name (important for files like lifestyleimage.jpg)
-    parent = os.path.basename(os.path.dirname(path))
-    p_match = re.search(r'(\d+)[xX_-](\d+)', parent)
-    if p_match: return p_match.group(1), p_match.group(2)
-
     return "728", "90"
 
+# Main Logic: Reverted to stable top-level only scanning
 for advertiser in sorted(os.listdir('.')):
     if os.path.isdir(advertiser) and not advertiser.startswith('.'):
         client_content = ""
-        
-        # 1. Look at items directly inside the Advertiser folder (Stable Structure)
+        # Only look at immediate folders and files (Stable Logic)
         for item in sorted(os.listdir(advertiser)):
             item_path = os.path.join(advertiser, item)
             
-            # CASE A: It's an Ad Folder (Adobe Animate)
+            # CASE 1: Ad Folders (e.g., WBAY_..._300x600)
             if os.path.isdir(item_path):
-                # Search for index.html in this folder
                 index_file = os.path.join(item_path, 'index.html')
                 if os.path.exists(index_file):
                     w, h = detect_dimensions(index_file, item)
-                    client_content += f'<div class="ad-box"><span class="label">FOLDER: {item} ({w}x{h})</span><iframe src="{item}/index.html" width="{w}" height="{h}" scrolling="no"></iframe></div>'
-                
-                # FIX: Also look for images INSIDE this ad folder (Numerical Bug fix)
-                # But IGNORE the 'images' folder where logos are stored (Clutter Bug fix)
-                for f in os.listdir(item_path):
-                    if f.lower().endswith(('.jpg', '.jpeg', '.png', '.gif')) and f != "index.html":
-                        img_p = os.path.join(item_path, f)
-                        # We only show it if it has dimensions in the name (to avoid showing logos)
-                        # OR if you want to show ALL images, remove the if 'x' in f check below.
-                        w_img, h_img = detect_dimensions(img_p, f)
-                        client_content += f'<div class="ad-box"><span class="label">IMAGE: {f} ({w_img}x{h_img})</span><img src="{item}/{f}" width="{w_img}" height="{h_img}"></div>'
-
-            # CASE B: It's a static image directly in the Advertiser folder
-            elif item.lower().endswith(('.jpg', '.jpeg', '.png', '.gif')) and item != "index.html":
+                    client_content += f'''
+                    <div class="ad-box">
+                        <span class="label">{item} ({w}x{h})</span>
+                        <iframe src="{item}/index.html" width="{w}" height="{h}" scrolling="no"></iframe>
+                    </div>'''
+            
+            # CASE 2: Root Image Files (Static Ads directly in Advertiser folder)
+            elif item.lower().endswith(('.jpg', '.jpeg', '.png', '.gif')):
+                if item == "index.html": continue
                 w, h = detect_dimensions(item_path, item)
-                client_content += f'<div class="ad-box"><span class="label">IMAGE: {item} ({w}x{h})</span><img src="{item}" width="{w}" height="{h}"></div>'
+                client_content += f'''
+                <div class="ad-box">
+                    <span class="label">{item} ({w}x{h})</span>
+                    <img src="{item}" width="{w}" height="{h}" alt="{item}">
+                </div>'''
         
         if client_content:
+            master_html = get_html_template(f"Campaign: {advertiser}", client_content)
             with open(os.path.join(advertiser, "index.html"), "w", encoding='utf-8') as f:
-                f.write(get_html_template(f"Campaign: {advertiser}", client_content))
+                f.write(master_html)
