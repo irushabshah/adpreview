@@ -8,7 +8,7 @@ def get_html_template(title, content):
     .controls {{ margin-bottom: 30px; position: sticky; top: 0; background: #f0f2f5; padding: 20px 0; z-index: 1000; border-bottom: 1px solid #ddd; }}
     button {{ padding: 12px 24px; font-weight: bold; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; }}
     .ad-box {{ background: #fff; margin: 15px; padding: 15px; display: inline-block; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); vertical-align: top; border: 1px solid #ddd; }}
-    .label {{ display: block; margin-bottom: 10px; font-weight: bold; color: #555; font-size: 11px; text-transform: uppercase; word-break: break-all; max-width: 300px; }}
+    .label {{ display: block; margin-bottom: 10px; font-weight: bold; color: #555; font-size: 11px; text-transform: uppercase; }}
     iframe, img {{ border: none; background: #fff; display: block; margin: 0 auto; }}
 </style></head><body>
     <div class="controls">
@@ -21,7 +21,7 @@ def get_html_template(title, content):
     </script></body></html>"""
 
 def detect_dimensions(path, name):
-    """Detects dimensions from HTML metadata, CSS, or Filename/Folder name."""
+    """Detects dimensions from HTML, filename, or parent folder."""
     if path.endswith('.html'):
         try:
             with open(path, 'r', encoding='utf-8', errors='ignore') as f:
@@ -32,50 +32,47 @@ def detect_dimensions(path, name):
                 if cs: return cs.group(1), cs.group(2)
         except: pass
 
-    # 1. Check filename for "300x600" or "_300x600"
+    # Check filename/foldername for "300x600"
     match = re.search(r'(\d+)[xX_-](\d+)', name)
     if match: return match.group(1), match.group(2)
+    
+    # Fallback: check the parent folder name (important for files like lifestyleimage.jpg)
+    parent = os.path.basename(os.path.dirname(path))
+    p_match = re.search(r'(\d+)[xX_-](\d+)', parent)
+    if p_match: return p_match.group(1), p_match.group(2)
 
-    # 2. FIX: If no numbers in name (lifestyleimage.jpg), check the parent folder name
-    parent_folder = os.path.basename(os.path.dirname(path))
-    parent_match = re.search(r'(\d+)[xX_-](\d+)', parent_folder)
-    if parent_match: return parent_match.group(1), parent_match.group(2)
-
-    return "728", "90" # Fallback
+    return "728", "90"
 
 for advertiser in sorted(os.listdir('.')):
     if os.path.isdir(advertiser) and not advertiser.startswith('.'):
         client_content = ""
         
-        # We now scan inside the advertiser folder to find nested images
-        for root, dirs, files in os.walk(advertiser):
-            # CRITICAL: Skip the 'images' folder (internal Adobe Animate assets)
-            if 'images' in root.lower().split(os.sep): continue
+        # 1. Look at items directly inside the Advertiser folder (Stable Structure)
+        for item in sorted(os.listdir(advertiser)):
+            item_path = os.path.join(advertiser, item)
             
-            # CASE 1: HTML5 Ad (The folder containing index.html)
-            if 'index.html' in files and root != advertiser:
-                p = os.path.join(root, 'index.html')
-                url = os.path.relpath(p, advertiser).replace('\\', '/')
-                w, h = detect_dimensions(p, os.path.basename(root))
-                client_content += f'''
-                <div class="ad-box">
-                    <span class="label">FOLDER: {os.path.basename(root)} ({w}x{h})</span>
-                    <iframe src="{url}" width="{w}" height="{h}" scrolling="no"></iframe>
-                </div>'''
-            
-            # CASE 2: Static Images (Backup/Numerical images)
-            for f in files:
-                # Find images but ignore the master index.html
-                if f.lower().endswith(('.jpg', '.jpeg', '.png', '.gif')) and f != "index.html":
-                    # Only show if the image is NOT an internal part of the Animate build
-                    p = os.path.join(root, f)
-                    url = os.path.relpath(p, advertiser).replace('\\', '/')
-                    w, h = detect_dimensions(p, f)
-                    client_content += f'''
-                    <div class="ad-box">
-                        <span class="label">IMAGE: {f} ({w}x{h})</span>
-                        <img src="{url}" width="{w}" height="{h}" alt="{f}">
-                    </div>'''
+            # CASE A: It's an Ad Folder (Adobe Animate)
+            if os.path.isdir(item_path):
+                # Search for index.html in this folder
+                index_file = os.path.join(item_path, 'index.html')
+                if os.path.exists(index_file):
+                    w, h = detect_dimensions(index_file, item)
+                    client_content += f'<div class="ad-box"><span class="label">FOLDER: {item} ({w}x{h})</span><iframe src="{item}/index.html" width="{w}" height="{h}" scrolling="no"></iframe></div>'
+                
+                # FIX: Also look for images INSIDE this ad folder (Numerical Bug fix)
+                # But IGNORE the 'images' folder where logos are stored (Clutter Bug fix)
+                for f in os.listdir(item_path):
+                    if f.lower().endswith(('.jpg', '.jpeg', '.png', '.gif')) and f != "index.html":
+                        img_p = os.path.join(item_path, f)
+                        # We only show it if it has dimensions in the name (to avoid showing logos)
+                        # OR if you want to show ALL images, remove the if 'x' in f check below.
+                        w_img, h_img = detect_dimensions(img_p, f)
+                        client_content += f'<div class="ad-box"><span class="label">IMAGE: {f} ({w_img}x{h_img})</span><img src="{item}/{f}" width="{w_img}" height="{h_img}"></div>'
+
+            # CASE B: It's a static image directly in the Advertiser folder
+            elif item.lower().endswith(('.jpg', '.jpeg', '.png', '.gif')) and item != "index.html":
+                w, h = detect_dimensions(item_path, item)
+                client_content += f'<div class="ad-box"><span class="label">IMAGE: {item} ({w}x{h})</span><img src="{item}" width="{w}" height="{h}"></div>'
         
         if client_content:
             with open(os.path.join(advertiser, "index.html"), "w", encoding='utf-8') as f:
