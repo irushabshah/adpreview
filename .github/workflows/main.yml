@@ -1,7 +1,7 @@
 name: Generate Preview Page
 on: [push]
 permissions:
-  contents: write # This gives the script permission to save the index.html
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,10 +13,12 @@ jobs:
           python-version: '3.9'
       - name: Run Indexer
         run: python generate_index.py
+      - name: Fix Underscore Images
+        run: touch .nojekyll # This is the fix for files like _300x600.jpg
       - name: Commit and Push all index files
         run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
-          git add . # This captures index.html inside all folders
-          git commit -m "Auto-update all master preview files" || exit 0
+          git add .
+          git commit -m "Auto-update previews and fix underscore assets" || exit 0
           git push
