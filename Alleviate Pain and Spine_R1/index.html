@@ -1,0 +1,37 @@
+<!DOCTYPE html><html><head><title>Campaign: Alleviate Pain and Spine_R1</title>
+<style>
+    body { font-family: sans-serif; background: #f0f2f5; padding: 20px; text-align: center; margin: 0; }
+    .controls { margin-bottom: 30px; position: sticky; top: 0; background: #f0f2f5; padding: 20px 0; z-index: 1000; border-bottom: 1px solid #ddd; }
+    button { padding: 12px 24px; font-weight: bold; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; }
+    .ad-box { background: #fff; margin: 15px; padding: 15px; display: inline-block; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); vertical-align: top; border: 1px solid #ddd; }
+    .label { display: block; margin-bottom: 10px; font-weight: bold; color: #555; font-size: 11px; text-transform: uppercase; word-wrap: break-word; max-width: 300px; }
+    iframe, img { border: none; background: #fff; display: block; margin: 0 auto; }
+</style></head><body>
+    <div class="controls">
+        <h1 style="margin: 0 0 15px 0;">Campaign: Alleviate Pain and Spine_R1</h1>
+        <button onclick="reloadAds()">🔄 Reload All Ads</button>
+    </div>
+    <div id="container">
+                <div class="ad-box">
+                    <span class="label">WBAY_214003_MM_160x600.jpg (160x600)</span>
+                    <img src="WBAY_214003_MM_160x600.jpg" width="160" height="600" alt="WBAY_214003_MM_160x600.jpg">
+                </div>
+                <div class="ad-box">
+                    <span class="label">WBAY_214003_MM_300x250.jpg (300x250)</span>
+                    <img src="WBAY_214003_MM_300x250.jpg" width="300" height="250" alt="WBAY_214003_MM_300x250.jpg">
+                </div>
+                <div class="ad-box">
+                    <span class="label">WBAY_214003_MM_300x600.jpg (300x600)</span>
+                    <img src="WBAY_214003_MM_300x600.jpg" width="300" height="600" alt="WBAY_214003_MM_300x600.jpg">
+                </div>
+                <div class="ad-box">
+                    <span class="label">WBAY_214003_MM_320x50.jpg (320x50)</span>
+                    <img src="WBAY_214003_MM_320x50.jpg" width="320" height="50" alt="WBAY_214003_MM_320x50.jpg">
+                </div>
+                <div class="ad-box">
+                    <span class="label">WBAY_214003_MM_728x90.jpg (728x90)</span>
+                    <img src="WBAY_214003_MM_728x90.jpg" width="728" height="90" alt="WBAY_214003_MM_728x90.jpg">
+                </div></div>
+    <script>
+        function reloadAds() { document.querySelectorAll('iframe').forEach(f => f.src = f.src); }
+    </script></body></html>
